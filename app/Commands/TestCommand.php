@@ -42,7 +42,7 @@ class TestCommand extends Command
         $this->info('Starting code-server');
         $command = 'export PASSWORD='.$this->codeServerPassword.';';
         $command .= 'code-server';
-        $command .= ' folder=/var/www/html';
+        $command .= ' /var/www/html';
         $command .= ' --auth=password';
         $command .= ' --cert=/home/ubuntu/certs/fullchain.pem'; // TODO: This can't be hardcoded
         $command .= ' --cert-key=/home/ubuntu/certs/privkey.pem'; // TODO: This can't be hardcoded
