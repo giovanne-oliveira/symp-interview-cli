@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5a49fb750e18263cb2002b7d866ad2b2",
+    "content-hash": "5503ce60ee4c54d84659b4e15dc1e70f",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -132,6 +132,48 @@
                 }
             ],
             "time": "2021-08-15T20:50:18+00:00"
+        },
+        {
+            "name": "cocur/background-process",
+            "version": "v0.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cocur/background-process.git",
+                "reference": "9ae2902922f02ec5544d723756758eb7304c6869"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cocur/background-process/zipball/9ae2902922f02ec5544d723756758eb7304c6869",
+                "reference": "9ae2902922f02ec5544d723756758eb7304c6869",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.5"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.8|~5.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Cocur\\BackgroundProcess\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Start processes in the background that continue running when the PHP process exists.",
+            "keywords": [
+                "background",
+                "process",
+                "unix"
+            ],
+            "support": {
+                "issues": "https://github.com/cocur/background-process/issues",
+                "source": "https://github.com/cocur/background-process/tree/master"
+            },
+            "time": "2017-02-11T12:41:41+00:00"
         },
         {
             "name": "container-interop/container-interop",

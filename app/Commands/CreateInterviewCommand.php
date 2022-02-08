@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Origin\Filesystem\File as OriginFileFS;
 use Origin\Filesystem\Folder as OriginDirFS;
+use Cocur\BackgroundProcess\BackgroundProcess;
+use Symfony\Component\Process\Process;
 
 class CreateInterviewCommand extends Command
 {
@@ -27,6 +29,7 @@ class CreateInterviewCommand extends Command
      */
     protected $description = 'Create a new interview instance for a candidate';
 
+    private $runtimeErrorMessage;
     private $candidateName;
     private $databaseInfo = [
         'host' => 'localhost',
@@ -35,6 +38,10 @@ class CreateInterviewCommand extends Command
         'password' => '',
         'port' => '3306',
     ];
+
+    private $codeServerPassword;
+    private $codeServerHost = 'interview.giovanne.dev';
+    private $codeServerPort = 8090;
 
     /**
      * Execute the console command.
@@ -94,10 +101,21 @@ class CreateInterviewCommand extends Command
             $this->displayError('There was an error fixing the candidate directory\'s permissions.');
         }
 
-
-        // TODO: Create user to allow candidate to access using Code Server
+        if($this->task('Initializing Visual Studio Code Server...', function () {
+            return $this->launchCodeServerInstance();
+        }) === false){
+            $this->displayError('There was an error fixing the candidate directory\'s permissions.');
+        }
 
         $this->info('Environment created successfully. All the information the candidate will need is in a file called INSTRUCTIONS.MD into the directory.');
+        $this->newLine(2);
+        $this->line('Everything is set to go. Your candidate must open the browser and paste the Live Coding URL provided below.');
+        $this->line('Then, the candidate must type the password also provided below, to have access to the Live Coding environment.');
+        $this->line('Once with vscode open in the browser, the candidate will find a INSTRUCTIONS.md file in the root of the project.');
+        $this->line('This file contains all the information needed to run the interview, including database credentials, Base URL and PHPMyAdmin URL.');
+        $this->newLine(2);
+        $this->info("Live Coding URL: https://".$this->codeServerHost.":".$this->codeServerPort);
+        $this->info("Password: ".$this->codeServerPassword);
     }
 
     private function createCandidateDirectory()
@@ -205,8 +223,8 @@ class CreateInterviewCommand extends Command
             $this->databaseInfo['password'],
             $this->databaseInfo['database'],
             $this->databaseInfo['port'],
-            'http://' . $this->candidateName . '.interview.giovanne.dev/phpmyadmin/',
-            'http://' . $this->candidateName . '.interview.giovanne.dev/',
+            'https://interview.giovanne.dev/phpmyadmin/', // TODO: Hardcoded URL
+            'https://interview.giovanne.dev/',
         ];
 
         $writeFileResponse = File::put(
@@ -220,6 +238,26 @@ class CreateInterviewCommand extends Command
 
         if($copyResponse && $writeFileResponse){
             return true;
+        }else{
+            return false;
+        }
+    }
+
+    private function launchCodeServerInstance()
+    {
+        $this->codeServerPassword = 'SympInterview@'.rand(1000, 9999);
+        $command = 'export PASSWORD='.$this->codeServerPassword.';';
+        $command .= 'code-server';
+        $command .= ' folder=/var/www/html/'.$this->candidateName;
+        $command .= ' --auth=password';
+        $command .= ' --cert=/home/ubuntu/certs/fullchain.pem'; // TODO: This can't be hardcoded
+        $command .= ' --cert-key=/home/ubuntu/certs/privkey.pem'; // TODO: This can't be hardcoded
+
+        $process = new BackgroundProcess($command);
+        $process->run();
+        $pid = $process->getPid();
+        if($process->isRunning()){
+            return DB::insert('INSERT INTO code_server_instances (candidate_name, pid, password, status, started_at) VALUES (?, ?, ?, 1, NOW())', [$this->candidateName, $pid, $this->codeServerPassword]);
         }else{
             return false;
         }

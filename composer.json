@@ -17,6 +17,7 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
+        "cocur/background-process": "^0.7.0",
         "illuminate/database": "^8.40",
         "illuminate/log": "^8.0",
         "laminas/laminas-text": "^2.8",
@@ -50,5 +51,5 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "bin": ["interviewcli"]
+    "bin": ["ivcli"]
 }
