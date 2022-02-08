@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Origin\Filesystem\File as OriginFileFS;
+use Origin\Filesystem\Folder as OriginDirFS;
 
 class CreateInterviewCommand extends Command
 {
@@ -16,7 +18,7 @@ class CreateInterviewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interview:create {name : The candidate name (required)}';
+    protected $signature = 'interview:init {name : The candidate name (required)}';
 
     /**
      * The description of the command.
@@ -86,6 +88,13 @@ class CreateInterviewCommand extends Command
             $this->displayError('There was an error populating the candidate folder.');
         }
 
+        if($this->task('Fixing directory\'s permission...', function () {
+            return $this->fixCandidateDirectoryPermissions();
+        }) === false){
+            $this->displayError('There was an error fixing the candidate directory\'s permissions.');
+        }
+
+
         // TODO: Create user to allow candidate to access using Code Server
 
         $this->info('Environment created successfully. All the information the candidate will need is in a file called INSTRUCTIONS.MD into the directory.');
@@ -93,13 +102,25 @@ class CreateInterviewCommand extends Command
 
     private function createCandidateDirectory()
     {
-        return Storage::disk('www_dir')->makeDirectory($this->candidateName);
+        return Storage::disk('public_html')->makeDirectory($this->candidateName);
         //return true; // DEBUG
+    }
+
+    private function fixCandidateDirectoryPermissions()
+    {
+        // TODO: Fix the ownership group
+        $chownResponse = OriginDirFS::chgrp('/var/www/html/' . $this->candidateName, 'www-data'); // TODO: Hardcoded path
+        $chmodResponse = OriginDirFS::chmod('/var/www/html/' . $this->candidateName, 0755); // TODO: Hardcoded path
+        if($chownResponse && $chmodResponse){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     private function checkCandidateDirExists()
     {
-        $dirs = Storage::disk('www_dir')->directories();
+        $dirs = Storage::disk('public_html')->directories();
         if(in_array($this->candidateName, $dirs)){
             return false;
         }else{
@@ -162,7 +183,7 @@ class CreateInterviewCommand extends Command
 
     private function populateCandidateFolder()
     {
-        $destination = '/var/www/interviewWorkspace/' . $this->candidateName;
+        $destination = '/var/www/html/' . $this->candidateName;
 
         $copyResponse = File::copyDirectory('storage/candidateFolderStub', $destination, true);
 

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c00ea0526f4b7055a0a310163b75dcf",
+    "content-hash": "5a49fb750e18263cb2002b7d866ad2b2",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -2432,6 +2432,112 @@
                 "source": "https://github.com/nunomaduro/laravel-desktop-notifier/tree/v2.6.0"
             },
             "time": "2022-01-13T15:10:14+00:00"
+        },
+        {
+            "name": "originphp/defer",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/originphp/defer.git",
+                "reference": "b62cc5501e00d1043441803b6377dcc800135880"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/originphp/defer/zipball/b62cc5501e00d1043441803b6377dcc800135880",
+                "reference": "b62cc5501e00d1043441803b6377dcc800135880",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.12.64",
+                "phpunit/phpunit": "^9.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Origin\\Defer\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jamiel Sharief",
+                    "email": "js@originphp.com"
+                }
+            ],
+            "description": "OriginPHP Defer - PHP implementation of the Go language defer statement",
+            "homepage": "https://www.originphp.com",
+            "keywords": [
+                "originPHP"
+            ],
+            "support": {
+                "issues": "https://github.com/originphp/defer/issues",
+                "source": "https://github.com/originphp/defer/tree/3.0.0"
+            },
+            "time": "2021-04-13T11:38:39+00:00"
+        },
+        {
+            "name": "originphp/filesystem",
+            "version": "3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/originphp/filesystem.git",
+                "reference": "d946acb306cb10f96863835906800f0b7db132b1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/originphp/filesystem/zipball/d946acb306cb10f96863835906800f0b7db132b1",
+                "reference": "d946acb306cb10f96863835906800f0b7db132b1",
+                "shasum": ""
+            },
+            "require": {
+                "originphp/defer": "^3.0",
+                "php": ">=7.3.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.12.64",
+                "phpunit/phpunit": "^9.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Origin\\Filesystem\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jamiel Sharief",
+                    "email": "js@originphp.com"
+                }
+            ],
+            "description": "OriginPHP Filesystem",
+            "homepage": "https://www.originphp.com",
+            "keywords": [
+                "chgrp",
+                "chmod",
+                "chown",
+                "file",
+                "filesystem",
+                "folder",
+                "originPHP"
+            ],
+            "support": {
+                "issues": "https://github.com/originphp/filesystem/issues",
+                "source": "https://github.com/originphp/filesystem/tree/3.1.0"
+            },
+            "time": "2021-04-13T12:46:08+00:00"
         },
         {
             "name": "php-school/cli-menu",
