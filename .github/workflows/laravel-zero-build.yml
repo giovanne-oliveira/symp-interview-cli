@@ -29,15 +29,21 @@ jobs:
     - name: Build PHAR
       run: php ivcli app:build
       
+    - name: Create changelog text
+      id: changelog
+      uses: loopwerk/tag-changelog@v1
+      with:
+        token: ${{ secrets.ACCESS_TOKEN }}
+      
     - name: Create release
       uses: actions/create-release@v1
       id: create_release
       with:
         draft: false
         prerelease: true
-        release_name: ${{ steps.semver_tagbump.outputs.new_tag}}
+        release_name: Release ${{ steps.semver_tagbump.outputs.new_tag}}
         tag_name: ${{ steps.semver_tagbump.outputs.new_tag}}
-        body_path: CHANGELOG.md
+        body_path: ${{ steps.changelog.outputs.changes }}
       env:
         GITHUB_TOKEN: ${{github.token}}
         
@@ -48,7 +54,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: builds/ivcli
-        asset_name: ivcli-binary
+        asset_name: ivcli
         asset_content_type: application/zip
         
       
