@@ -43,7 +43,7 @@ jobs:
         prerelease: true
         release_name: Release ${{ steps.semver_tagbump.outputs.new_tag}}
         tag_name: ${{ steps.semver_tagbump.outputs.new_tag}}
-        body_path: ${{ steps.changelog.outputs.changes }}
+        body: ${{ steps.changelog.outputs.changes }}
       env:
         GITHUB_TOKEN: ${{github.token}}
         
