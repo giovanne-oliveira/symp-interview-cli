@@ -1,0 +1,60 @@
+name: CLI Build
+
+on:
+  push:
+    branches: [ release ]
+  pull_request:
+    branches: [ release ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      with:
+        php-version: '7.4'
+    - uses: actions/checkout@v2
+    
+    - name: Bump version and push tag
+      id: semver_tagbump
+      uses: anothrNick/github-tag-action@1.36.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
+        WITH_V: false
+        DEFAULT_BUMP: patch
+      
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      
+    - name: Build PHAR
+      run: php ivcli app:build
+      
+    - name: Create changelog text
+      id: changelog
+      uses: loopwerk/tag-changelog@v1
+      with:
+        token: ${{ secrets.ACCESS_TOKEN }}
+      
+    - name: Create release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: false
+        release_name: Release ${{ steps.semver_tagbump.outputs.new_tag}}
+        tag_name: ${{ steps.semver_tagbump.outputs.new_tag}}
+        body: ${{ steps.changelog.outputs.changes }}
+      env:
+        GITHUB_TOKEN: ${{github.token}}
+        
+    - name: Upload artifacts
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: builds/ivcli
+        asset_name: ivcli
+        asset_content_type: application/zip
+        
+      
