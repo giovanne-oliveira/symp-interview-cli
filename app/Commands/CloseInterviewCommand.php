@@ -268,9 +268,6 @@ class CloseInterviewCommand extends Command
         if ($process->stop()) {
             DB::table('code_server_instances')->where('candidate_name', $candidateName)->update(['status' => 0]);
             return true;
-        }else{
-            $this->error('Error while closing session.');
-            return false;
         }
     }
 
@@ -297,6 +294,10 @@ class CloseInterviewCommand extends Command
     private function postActionHooks()
     {
         // Here we can insert some code to run after the candidate has been removed
+
+        // Write the end time for the interview
+        // TODO: Write a better query for this
+        DB::update("UPDATE code_server_instances SET finished_at = NOW() WHERE candidate = ?", [$this->interviewId]);
         return true;
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Origin\Filesystem\Folder as OriginDirFS;
 use Cocur\BackgroundProcess\BackgroundProcess;
+use App\Libraries\Lock;
 
 class CreateInterviewCommand extends Command
 {
@@ -104,6 +105,12 @@ class CreateInterviewCommand extends Command
             $this->displayError('There was an error fixing the candidate directory\'s permissions.');
         }
 
+        if($this->task('Running post-action hooks...', function () {
+            return $this->postActionHooks();
+        }) === false){
+            $this->displayError('There was an error fixing the candidate directory\'s permissions.');
+        }
+
         $this->info('Environment created successfully. All the information the candidate will need is in a file called INSTRUCTIONS.MD into the directory.');
         $this->newLine(2);
         $this->line('Everything is set to go. Your candidate must open the browser and paste the Live Coding URL provided below.');
@@ -113,6 +120,13 @@ class CreateInterviewCommand extends Command
         $this->newLine(2);
         $this->info("Live Coding URL: https://".$this->codeServerHost.":".$this->codeServerPort);
         $this->info("Password: ".$this->codeServerPassword);
+    }
+
+
+    private function postActionHooks()
+    {
+        // Create a lock
+        Lock::lock('interview', $this->candidateName);
     }
 
     private function createCandidateDirectory()
