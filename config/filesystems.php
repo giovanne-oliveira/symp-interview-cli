@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => 'local',
+    'default' => 'public_html',
     'disks' => [
         'local' => [
             'driver' => 'local',

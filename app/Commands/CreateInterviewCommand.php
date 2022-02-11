@@ -2,16 +2,13 @@
 
 namespace App\Commands;
 
-use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Origin\Filesystem\File as OriginFileFS;
 use Origin\Filesystem\Folder as OriginDirFS;
 use Cocur\BackgroundProcess\BackgroundProcess;
-use Symfony\Component\Process\Process;
 
 class CreateInterviewCommand extends Command
 {
@@ -20,7 +17,7 @@ class CreateInterviewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'interview:init {name : The candidate name (required)}';
+    protected $signature = 'init {name : The candidate name (required)}';
 
     /**
      * The description of the command.
@@ -224,7 +221,7 @@ class CreateInterviewCommand extends Command
             $this->databaseInfo['database'],
             $this->databaseInfo['port'],
             'https://interview.giovanne.dev/phpmyadmin/', // TODO: Hardcoded URL
-            'https://interview.giovanne.dev/',
+            'https://interview.giovanne.dev/'.$this->candidateName,
         ];
 
         $writeFileResponse = File::put(
