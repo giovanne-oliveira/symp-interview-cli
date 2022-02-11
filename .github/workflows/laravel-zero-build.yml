@@ -2,9 +2,9 @@ name: CLI Build
 
 on:
   push:
-    branches: [ development ]
+    branches: [ beta ]
   pull_request:
-    branches: [ development ]
+    branches: [ beta ]
 
 jobs:
   build:
