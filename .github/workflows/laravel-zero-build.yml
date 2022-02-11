@@ -21,6 +21,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
         WITH_V: false
+        DEFAULT_BUMP: patch
       
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
@@ -46,6 +47,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./build/ivcli
+        asset_path: builds/ivcli
         
       
