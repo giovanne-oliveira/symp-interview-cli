@@ -14,13 +14,42 @@ jobs:
       with:
         php-version: '7.4'
     - uses: actions/checkout@v2
+    
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.36.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
+        WITH_V: false
       
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       
     - name: Generate build number
+      id: buildnumber
       uses: einaregilsson/build-number@v3
       with:
         token: ${{secrets.ACCESS_TOKEN}}
     - name: Build PHAR
       run: php ivcli app:build
+      
+    - name: Create release
+      uses: actions/create-release@v1
+      id: create_release
+      with:
+        draft: false
+        prerelease: true
+        release_name: ${{ steps.buildnumber.outputs.build_numer}}
+        tag_name: ${{ github.ref }}
+        body_path: CHANGELOG.md
+      env:
+        GITHUB_TOKEN: ${{github.token}}
+        
+    - name: Upload artifacts
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN}}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./builds/ivcli
+        
+      
