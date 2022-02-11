@@ -48,6 +48,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: builds/ivcli
-        asset_name: IVCLI Binary
+        asset_name: ivcli-binary
+        asset_content_type: application/zip
         
       
