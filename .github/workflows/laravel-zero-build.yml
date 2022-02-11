@@ -1,0 +1,30 @@
+name: Laravel Zero
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      with:
+        php-version: '7.4'
+    - uses: actions/checkout@v2
+    - name: Bump version and push tag
+      uses: hennejg/github-tag-action@v4.1.jh1
+      with:
+        github_token: ${{secrets.ACCESS_TOKEN}}
+        
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      
+    - name: Generate build number
+      uses: einaregilsson/build-number@v3
+      with:
+        token: ${{secrets.ACCESS_TOKEN}}
+    - name: Build PHAR
+      run: php ivcli app:build
