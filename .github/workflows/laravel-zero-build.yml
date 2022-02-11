@@ -1,10 +1,10 @@
-name: Laravel Zero
+name: CLI Build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ build ]
   pull_request:
-    branches: [ master ]
+    branches: [ build ]
 
 jobs:
   build:
