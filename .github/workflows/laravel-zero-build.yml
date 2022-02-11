@@ -14,11 +14,7 @@ jobs:
       with:
         php-version: '7.4'
     - uses: actions/checkout@v2
-    - name: Bump version and push tag
-      uses: hennejg/github-tag-action@v4.1.jh1
-      with:
-        github_token: ${{secrets.ACCESS_TOKEN}}
-        
+      
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       
