@@ -47,6 +47,11 @@ class CloseInterviewCommand extends Command
      */
     public function handle()
     {
+        // Setup variables
+        $this->mysqldumpPath = env('MYSQLDUMP_PATH', $this->mysqldumpPath);
+
+        // Run the app
+
         $this->line($this->getApplication()->getName());
         $this->candidateName = str_replace(' ', '_', $this->argument('name'));
 
