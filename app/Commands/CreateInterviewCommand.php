@@ -38,7 +38,7 @@ class CreateInterviewCommand extends Command
     ];
 
     private $codeServerPassword;
-    private $codeServerHost = 'interview.giovanne.dev';
+    private $codeServerHost;
     private $codeServerPort = 8090;
 
     /**
@@ -48,6 +48,12 @@ class CreateInterviewCommand extends Command
      */
     public function handle()
     {
+        // Setup variables
+
+        $this->codeServerHost = env('CODE_SERVER_HOST');
+        $this->codeServerPort = env('CODE_SERVER_PORT');
+
+        // Run the command
         $this->line($this->getApplication()->getName());
 
         $candidateName = $this->argument('name');
@@ -56,11 +62,11 @@ class CreateInterviewCommand extends Command
         $this->candidateName = $candidateName;
 
         if ($this->task('Checking if interview workspace is writeable...', function () {
-            if (!is_writeable('/var/www/interviewWorkspace')) {
+            if (!is_writeable(env('PUBLIC_HTML_PATH', '/var/www/html'))) {
                 return false;
             }
         }, 'checking') === false) {
-            $this->displayError('The /var/www/interviewWorkspace is not writeable.');
+            $this->displayError('The '.env('PUBLIC_HTML_PATH', '/var/www/html').' is not writeable.');
         }
 
         if ($this->task('Checking if the name is not already used', function () {
@@ -138,8 +144,8 @@ class CreateInterviewCommand extends Command
     private function fixCandidateDirectoryPermissions()
     {
         // TODO: Fix the ownership group
-        $chownResponse = OriginDirFS::chgrp('/var/www/html/' . $this->candidateName, 'www-data'); // TODO: Hardcoded path
-        $chmodResponse = OriginDirFS::chmod('/var/www/html/' . $this->candidateName, 0755); // TODO: Hardcoded path
+        $chownResponse = OriginDirFS::chgrp(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('PUBLIC_HTML_GROUP', 'www-data')); // TODO: Hardcoded path
+        $chmodResponse = OriginDirFS::chmod(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('CANDIDATE_FOLDER_PERMISSION', 0755));
         if($chownResponse && $chmodResponse){
             return true;
         }else{
@@ -187,7 +193,7 @@ class CreateInterviewCommand extends Command
     {
         // Check if the database user exists
         $dbUser = $this->candidateName . '_interview';
-        $dbPassword = 'SympTest@123';
+        $dbPassword = env('CANDIDATE_DEFAULT_MYSQL_PASSWORD', 'SympTest@123');
         $dbName = $this->databaseInfo['database'];
 
         $this->databaseInfo['username'] = $dbUser;
@@ -212,7 +218,7 @@ class CreateInterviewCommand extends Command
 
     private function populateCandidateFolder()
     {
-        $destination = '/var/www/html/' . $this->candidateName;
+        $destination = env('PUBLIC_HTML_PATH', '/var/www/html') . '/' . $this->candidateName;
 
         $copyResponse = File::copyDirectory('storage/candidateFolderStub', $destination, true);
 
@@ -234,8 +240,8 @@ class CreateInterviewCommand extends Command
             $this->databaseInfo['password'],
             $this->databaseInfo['database'],
             $this->databaseInfo['port'],
-            'https://interview.giovanne.dev/phpmyadmin/', // TODO: Hardcoded URL
-            'https://interview.giovanne.dev/'.$this->candidateName,
+            env('PUBLIC_URL'),
+            env('PHPMYADMIN_URL').$this->candidateName,
         ];
 
         $writeFileResponse = File::put(
@@ -257,12 +263,14 @@ class CreateInterviewCommand extends Command
     private function launchCodeServerInstance()
     {
         $this->codeServerPassword = 'SympInterview@'.rand(1000, 9999);
+
+        // TODO: Check if the SSL config is valid. If not, generate a command to run code-server in http mode.
         $command = 'export PASSWORD='.$this->codeServerPassword.';';
         $command .= 'code-server';
         $command .= ' /var/www/html/'.$this->candidateName;
         $command .= ' --auth=password';
-        $command .= ' --cert=/home/ubuntu/certs/fullchain.pem'; // TODO: This can't be hardcoded
-        $command .= ' --cert-key=/home/ubuntu/certs/privkey.pem'; // TODO: This can't be hardcoded
+        $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
+        $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
 
         $process = new BackgroundProcess($command);
         $process->run();
