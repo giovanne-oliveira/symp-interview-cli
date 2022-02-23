@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Origin\Filesystem\Folder as OriginDirFS;
 use Cocur\BackgroundProcess\BackgroundProcess;
 use App\Libraries\Lock;
+use Symfony\Component\Process\Process;
 
 class CreateInterviewCommand extends Command
 {
@@ -145,14 +146,33 @@ class CreateInterviewCommand extends Command
 
     private function fixCandidateDirectoryPermissions()
     {
-        // TODO: Fix the ownership group
-        $chownResponse = OriginDirFS::chgrp(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('PUBLIC_HTML_GROUP', 'www-data')); // TODO: Hardcoded path
-        $chmodResponse = OriginDirFS::chmod(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('CANDIDATE_FOLDER_PERMISSION', 0755));
-        if($chownResponse && $chmodResponse){
-            return true;
-        }else{
+        
+        $chownResponse = OriginDirFS::chgrp(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('PUBLIC_HTML_GROUP', 'www-data'));
+        $chmodResponse = OriginDirFS::chmod(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('CANDIDATE_FOLDER_PERMISSION', 0755));      
+
+        $chmodProcess = new Process([
+            'chmod',
+            '-R',
+            env('CANDIDATE_FOLDER_PERMISSION', 0755),
+            env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName
+        ]);
+
+        $chownProcess = new Process([
+            'chown',
+            '-R',
+            env('PUBLIC_HTML_USER', 'www-data'),
+            env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName
+        ]);
+
+        $chownProcess->start();
+        $chmodProcess->start();
+
+        /*if (!$chownProcess->isSuccessful() || !$chmodProcess->isSuccessful()) {
             return false;
-        }
+        }else{
+            return true;
+        }*/
+        return true;
     }
 
     private function checkCandidateDirExists()
