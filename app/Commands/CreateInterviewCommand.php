@@ -95,6 +95,12 @@ class CreateInterviewCommand extends Command
             $this->displayError('There was an error creating the candidate database credentials.');
         }
 
+        if($this->task('Cloning test repository...', function () {
+            return $this->cloneRepository();
+        }) === false){
+            $this->displayError('There was an error while cloning the test repository.');
+        }
+
         if($this->task('Populating test folder with Skeleton files...', function () {
             return $this->populateCandidateFolder();
         }) === false){
@@ -167,6 +173,7 @@ class CreateInterviewCommand extends Command
         $chownProcess->start();
         $chmodProcess->start();
 
+        // TODO: Check if the process was successfull.
         /*if (!$chownProcess->isSuccessful() || !$chmodProcess->isSuccessful()) {
             return false;
         }else{
@@ -303,6 +310,27 @@ class CreateInterviewCommand extends Command
         $pid = $process->getPid();
         if($process->isRunning()){
             return DB::insert('INSERT INTO code_server_instances (candidate_name, pid, password, status, started_at) VALUES (?, ?, ?, 1, NOW())', [$this->candidateName, $pid, $this->codeServerPassword]);
+        }else{
+            return false;
+        }
+    }
+
+    private function cloneRepository()
+    {
+        if(env('CODING_TEST_REPO') == ''){
+            return false;
+        }
+        $Process = new Process([
+            'git',
+            'clone',
+            env('CODING_TEST_REPO'),
+            './'
+        ]);
+
+        $Process->setWorkingDirectory(env('PUBLIC_HTML_PATH', '/var/www/html') . '/' . $this->candidateName);
+        $Process->run();
+        if($Process->isSuccessful()){
+            return true;
         }else{
             return false;
         }

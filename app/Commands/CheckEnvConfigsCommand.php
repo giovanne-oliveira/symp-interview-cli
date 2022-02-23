@@ -59,6 +59,7 @@ class CheckEnvConfigsCommand extends Command
             ['CODE_SERVER_SSL_CERT_PATH', env('CODE_SERVER_SSL_CERT_PATH')],
             ['CODE_SERVER_SSL_KEY_PATH', env('CODE_SERVER_SSL_KEY_PATH')],
             ['MYSQLDUMP_PATH', env('MYSQLDUMP_PATH')],
+            ['CODING_TEST_REPO', env('CODING_TEST_REPO')]
         ]);
 
     }
