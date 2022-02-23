@@ -41,11 +41,11 @@ class CheckEnvConfigsCommand extends Command
             'Variable',
             'Value'
         ], [
-            ['DB_WORKER_HOST', env('DB_WORKER_HOST')],
-            ['DB_WORKER_PORT', env('DB_WORKER_PORT')],
-            ['DB_WORKER_SCHEMA', env('DB_WORKER_SCHEMA')],
-            ['DB_WORKER_USER', env('DB_WORKER_USER')],
-            ['DB_WORKER_PASS', env('DB_WORKER_PASS')],
+            ['WORKER_DB_HOST', env('WORKER_DB_HOST')],
+            ['WORKER_DB_PORT', env('WORKER_DB_PORT')],
+            ['WORKER_DB_SCHEMA', env('WORKER_DB_SCHEMA')],
+            ['WORKER_DB_USER', env('WORKER_DB_USER')],
+            ['WORKER_DB_PASS', env('WORKER_DB_PASS')],
             ['PUBLIC_URL', env('PUBLIC_URL')],
             ['PUBLIC_HTML_PATH', env('PUBLIC_HTML_PATH')],
             ['PUBLIC_HTML_GROUP', env('PUBLIC_HTML_GROUP')],
