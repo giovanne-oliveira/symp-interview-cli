@@ -3,13 +3,7 @@
 namespace App\Commands;
 
 use LaravelZero\Framework\Commands\Command;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Origin\Filesystem\Folder as OriginDirFS;
-use Cocur\BackgroundProcess\BackgroundProcess;
-use App\Libraries\Lock;
 
 class SelfTestCommand extends Command
 {
