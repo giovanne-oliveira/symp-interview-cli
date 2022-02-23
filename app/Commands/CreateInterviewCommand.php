@@ -249,7 +249,7 @@ class CreateInterviewCommand extends Command
     {
         $destination = env('PUBLIC_HTML_PATH', '/var/www/html') . '/' . $this->candidateName;
 
-        $copyResponse = File::copyDirectory('storage/candidateFolderStub', $destination, true);
+        $copyResponse = File::copyDirectory(storage_path('candidateFolderStub'), $destination, true);
 
         // Replace the database info in the instruction file
         $instructionStub = $destination . '/INSTRUCTIONS.md';
