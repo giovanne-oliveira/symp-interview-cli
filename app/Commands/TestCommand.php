@@ -37,28 +37,9 @@ class TestCommand extends Command
      */
     public function handle()
     {
-        $this->codeServerPassword = 'SympInterview@'.rand(1000, 9999);
-        $this->line($this->getApplication()->getName());
-        $this->info('Starting code-server');
-        $command = 'export PASSWORD='.$this->codeServerPassword.';';
-        $command .= 'code-server';
-        $command .= ' /var/www/html';
-        $command .= ' --auth=password';
-        $command .= ' --cert=/home/ubuntu/certs/fullchain.pem'; // TODO: This can't be hardcoded
-        $command .= ' --cert-key=/home/ubuntu/certs/privkey.pem'; // TODO: This can't be hardcoded
+        $destination = env('PUBLIC_HTML_PATH', '/var/www/html') . '/' . $this->candidateName;
 
-        /*$process = new Process([$command]);
-        $process->run();
-        foreach ($process as $type => $data) {
-            if ($process::OUT === $type) {
-                echo "\nRead from stdout: ".$data;
-            } else { // $process::ERR === $type
-                echo "\nRead from stderr: ".$data;
-            }
-        }*/
-        $process = new BackgroundProcess($command);
-        $process->run();
-        $this->info('Started with PID ' . $process->getPid());
+        var_dump(File::copyDirectory(storage_path('candidateFolderStub'), $destination, true));
     }
 
 }
