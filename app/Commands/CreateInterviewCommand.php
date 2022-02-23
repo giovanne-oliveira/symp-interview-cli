@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Origin\Filesystem\Folder as OriginDirFS;
 use Cocur\BackgroundProcess\BackgroundProcess;
 use App\Libraries\Lock;
+use Symfony\Component\Process\Process;
 
 class CreateInterviewCommand extends Command
 {
@@ -40,6 +41,7 @@ class CreateInterviewCommand extends Command
     private $codeServerPassword;
     private $codeServerHost;
     private $codeServerPort = 8090;
+    private $codeServerSSL = false;
 
     /**
      * Execute the console command.
@@ -93,6 +95,12 @@ class CreateInterviewCommand extends Command
             $this->displayError('There was an error creating the candidate database credentials.');
         }
 
+        if($this->task('Cloning test repository...', function () {
+            return $this->cloneRepository();
+        }) === false){
+            $this->displayError('There was an error while cloning the test repository.');
+        }
+
         if($this->task('Populating test folder with Skeleton files...', function () {
             return $this->populateCandidateFolder();
         }) === false){
@@ -124,7 +132,8 @@ class CreateInterviewCommand extends Command
         $this->line('Once with vscode open in the browser, the candidate will find a INSTRUCTIONS.md file in the root of the project.');
         $this->line('This file contains all the information needed to run the interview, including database credentials, Base URL and PHPMyAdmin URL.');
         $this->newLine(2);
-        $this->info("Live Coding URL: https://".$this->codeServerHost.":".$this->codeServerPort);
+        $protocol = $this->codeServerSSL ? 'https://' : 'http://';
+        $this->info("Live Coding URL: ". $protocol . $this->codeServerHost . ":" . $this->codeServerPort);
         $this->info("Password: ".$this->codeServerPassword);
     }
 
@@ -143,14 +152,34 @@ class CreateInterviewCommand extends Command
 
     private function fixCandidateDirectoryPermissions()
     {
-        // TODO: Fix the ownership group
-        $chownResponse = OriginDirFS::chgrp(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('PUBLIC_HTML_GROUP', 'www-data')); // TODO: Hardcoded path
-        $chmodResponse = OriginDirFS::chmod(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('CANDIDATE_FOLDER_PERMISSION', 0755));
-        if($chownResponse && $chmodResponse){
-            return true;
-        }else{
+        
+        $chownResponse = OriginDirFS::chgrp(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('PUBLIC_HTML_GROUP', 'www-data'));
+        $chmodResponse = OriginDirFS::chmod(env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName, env('CANDIDATE_FOLDER_PERMISSION', 0755));      
+
+        $chmodProcess = new Process([
+            'chmod',
+            '-R',
+            env('CANDIDATE_FOLDER_PERMISSION', 0755),
+            env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName
+        ]);
+
+        $chownProcess = new Process([
+            'chown',
+            '-R',
+            env('PUBLIC_HTML_USER', 'www-data'),
+            env('PUBLIC_HTML_PATH', '/var/www/html'). '/' . $this->candidateName
+        ]);
+
+        $chownProcess->start();
+        $chmodProcess->start();
+
+        // TODO: Check if the process was successfull.
+        /*if (!$chownProcess->isSuccessful() || !$chmodProcess->isSuccessful()) {
             return false;
-        }
+        }else{
+            return true;
+        }*/
+        return true;
     }
 
     private function checkCandidateDirExists()
@@ -264,19 +293,44 @@ class CreateInterviewCommand extends Command
     {
         $this->codeServerPassword = 'SympInterview@'.rand(1000, 9999);
 
-        // TODO: Check if the SSL config is valid. If not, generate a command to run code-server in http mode.
         $command = 'export PASSWORD='.$this->codeServerPassword.';';
         $command .= 'code-server';
         $command .= ' /var/www/html/'.$this->candidateName;
         $command .= ' --auth=password';
-        $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
-        $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
 
+        if(env('CODE_SERVER_ENABLE_SSL', false) && env('CODE_SERVER_SSL_CERT_PATH', '') != ''){
+            // SSL enabled for code server
+            $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
+            $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
+            $this->codeServerSSL = true;
+        }
+    
         $process = new BackgroundProcess($command);
         $process->run();
         $pid = $process->getPid();
         if($process->isRunning()){
             return DB::insert('INSERT INTO code_server_instances (candidate_name, pid, password, status, started_at) VALUES (?, ?, ?, 1, NOW())', [$this->candidateName, $pid, $this->codeServerPassword]);
+        }else{
+            return false;
+        }
+    }
+
+    private function cloneRepository()
+    {
+        if(env('CODING_TEST_REPO') == ''){
+            return false;
+        }
+        $Process = new Process([
+            'git',
+            'clone',
+            env('CODING_TEST_REPO'),
+            './'
+        ]);
+
+        $Process->setWorkingDirectory(env('PUBLIC_HTML_PATH', '/var/www/html') . '/' . $this->candidateName);
+        $Process->run();
+        if($Process->isSuccessful()){
+            return true;
         }else{
             return false;
         }
