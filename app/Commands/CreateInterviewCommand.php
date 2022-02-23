@@ -40,6 +40,7 @@ class CreateInterviewCommand extends Command
     private $codeServerPassword;
     private $codeServerHost;
     private $codeServerPort = 8090;
+    private $codeServerSSL = false;
 
     /**
      * Execute the console command.
@@ -124,7 +125,8 @@ class CreateInterviewCommand extends Command
         $this->line('Once with vscode open in the browser, the candidate will find a INSTRUCTIONS.md file in the root of the project.');
         $this->line('This file contains all the information needed to run the interview, including database credentials, Base URL and PHPMyAdmin URL.');
         $this->newLine(2);
-        $this->info("Live Coding URL: https://".$this->codeServerHost.":".$this->codeServerPort);
+        $protocol = $this->codeServerSSL ? 'https://' : 'http://';
+        $this->info("Live Coding URL: ". $protocol . $this->codeServerHost . ":" . $this->codeServerPort);
         $this->info("Password: ".$this->codeServerPassword);
     }
 
@@ -273,6 +275,7 @@ class CreateInterviewCommand extends Command
             // SSL enabled for code server
             $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
             $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
+            $this->codeServerSSL = true;
         }
     
         $process = new BackgroundProcess($command);

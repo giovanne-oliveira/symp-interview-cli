@@ -40,6 +40,8 @@ class CloseInterviewCommand extends Command
 
     private $mysqldumpPath = '/usr/bin/mysqldump';
 
+    private $interviewId;
+
     /**
      * Execute the console command.
      *
@@ -163,7 +165,7 @@ class CloseInterviewCommand extends Command
             die();
         }
     }
-    
+
     private function candidateHasDatabase()
     {
         $dbName = $this->candidateName . '_interview';
@@ -180,7 +182,7 @@ class CloseInterviewCommand extends Command
         $fileName = 'database_' . $this->candidateName . '.sql';
 
         // Check if the file already exists
-        if(Storage::disk('public_html')->exists($fileName)) {
+        if (Storage::disk('public_html')->exists($fileName)) {
             // If so, delete the old file
             Storage::disk('public_html')->delete($fileName);
         }
@@ -259,6 +261,9 @@ class CloseInterviewCommand extends Command
             return false;
         }
 
+        // Set the interview ID
+        $this->interviewId = $meta[0]->id;
+
         $process = BackgroundProcess::createFromPID($meta[0]->pid);
         /*
             // TODO: This was disabled until I found a way to return if the process was already killed
@@ -273,6 +278,9 @@ class CloseInterviewCommand extends Command
         if ($process->stop()) {
             DB::table('code_server_instances')->where('candidate_name', $candidateName)->update(['status' => 0]);
             return true;
+        }else{
+            $this->error('Error while closing code-server session.');
+            return false;
         }
     }
 
@@ -302,7 +310,7 @@ class CloseInterviewCommand extends Command
 
         // Write the end time for the interview
         // TODO: Write a better query for this
-        DB::update("UPDATE code_server_instances SET finished_at = NOW() WHERE candidate = ?", [$this->interviewId]);
+        DB::update("UPDATE code_server_instances SET finished_at = NOW() WHERE id = ?", [$this->interviewId]);
         return true;
     }
 }
