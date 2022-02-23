@@ -264,14 +264,17 @@ class CreateInterviewCommand extends Command
     {
         $this->codeServerPassword = 'SympInterview@'.rand(1000, 9999);
 
-        // TODO: Check if the SSL config is valid. If not, generate a command to run code-server in http mode.
         $command = 'export PASSWORD='.$this->codeServerPassword.';';
         $command .= 'code-server';
         $command .= ' /var/www/html/'.$this->candidateName;
         $command .= ' --auth=password';
-        $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
-        $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
 
+        if(env('CODE_SERVER_ENABLE_SSL', false) && env('CODE_SERVER_SSL_CERT_PATH', '') != ''){
+            // SSL enabled for code server
+            $command .= ' --cert='.env('CODE_SERVER_SSL_CERT_PATH'); 
+            $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
+        }
+    
         $process = new BackgroundProcess($command);
         $process->run();
         $pid = $process->getPid();
