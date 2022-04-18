@@ -305,7 +305,6 @@ class CreateInterviewCommand extends Command
             $command .= ' --cert-key='.env('CODE_SERVER_SSL_KEY_PATH'); 
             $this->codeServerSSL = true;
         }
-    
         $process = new BackgroundProcess($command);
         $process->run();
         $pid = $process->getPid();
