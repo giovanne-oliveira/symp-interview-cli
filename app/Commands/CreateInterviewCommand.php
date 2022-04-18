@@ -297,6 +297,7 @@ class CreateInterviewCommand extends Command
         $command .= 'code-server';
         $command .= ' /var/www/html/'.$this->candidateName;
         $command .= ' --auth=password';
+        $command .= ' --bind-addr 0.0.0.0:'.env('CODE_SERVER_PORT', '8090');
 
         if(env('CODE_SERVER_ENABLE_SSL', false) && env('CODE_SERVER_SSL_CERT_PATH', '') != ''){
             // SSL enabled for code server

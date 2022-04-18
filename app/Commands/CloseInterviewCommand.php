@@ -94,6 +94,10 @@ class CloseInterviewCommand extends Command
         $this->backupCandidateFiles = $this->confirm('Do you want to backup the candidate files and database?', true);
         $this->removeCandidateData = $this->confirm('Do you want to delete the candidate files and database?', true);
 
+        $this->completionSteps = $this->question('How many steps the candidate completed before the end of the test?', 0);
+
+        $this->indicatedPosition = $this->choice('Which position did the candidate indicate?', ['junior', 'plain', 'senior']);
+
 
         $this->info('Closing interview environment for ' . $this->candidateName);
 
@@ -307,6 +311,9 @@ class CloseInterviewCommand extends Command
     private function postActionHooks()
     {
         // Here we can insert some code to run after the candidate has been removed
+
+        // Update the candidate's status and recommendations
+        
 
         // Write the end time for the interview
         // TODO: Write a better query for this
