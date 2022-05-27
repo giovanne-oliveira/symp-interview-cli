@@ -59,7 +59,7 @@ class CreateInterviewCommand extends Command
         $this->line($this->getApplication()->getName());
 
         $candidateName = $this->argument('name');
-        
+
         if(!$candidateName || empty($candidateName)){
             $candidateName = $this->ask('Please enter the candidate name');
         }
@@ -276,7 +276,7 @@ class CreateInterviewCommand extends Command
             $this->databaseInfo['password'],
             $this->databaseInfo['database'],
             $this->databaseInfo['port'],
-            env('PUBLIC_URL').$this->candidateName,
+            env('PUBLIC_URL').'/'.$this->candidateName,
             env('PHPMYADMIN_URL'),
         ];
 
