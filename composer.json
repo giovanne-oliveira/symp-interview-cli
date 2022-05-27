@@ -15,6 +15,16 @@
             "email": "enunomaduro@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.symplicity.com"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/Symplicity/addressing"
+        }
+    ],
     "require": {
         "php": "^7.3|^8.0",
         "cocur/background-process": "^0.7.0",
