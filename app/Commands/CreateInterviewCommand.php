@@ -19,7 +19,7 @@ class CreateInterviewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'init {name : The candidate name (required)}';
+    protected $signature = 'init {name? : The candidate name (required)}';
 
     /**
      * The description of the command.
@@ -59,10 +59,13 @@ class CreateInterviewCommand extends Command
         $this->line($this->getApplication()->getName());
 
         $candidateName = $this->argument('name');
-        $candidateName = str_replace(' ', '_', $candidateName);
+        
         if(!$candidateName || empty($candidateName)){
             $candidateName = $this->ask('Please enter the candidate name');
         }
+
+        $candidateName = str_replace(' ', '_', $candidateName);
+
         
         $this->info('Creating interview environment for ' . $candidateName);
         $this->candidateName = $candidateName;

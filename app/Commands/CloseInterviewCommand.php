@@ -21,7 +21,7 @@ class CloseInterviewCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'close {name : The candidate name (required)}';
+    protected $signature = 'close {name? : The candidate name (required)}';
 
     /**
      * The description of the command.
@@ -59,6 +59,11 @@ class CloseInterviewCommand extends Command
         // Run the app
 
         $this->line($this->getApplication()->getName());
+
+        if(!$this->argument('name') || empty($this->argument('name'))){
+            $candidateName = $this->ask('Please enter the candidate name');
+        }
+
         $this->candidateName = str_replace(' ', '_', $this->argument('name'));
 
         if ($this->task('Running pre-checks...', function () {
