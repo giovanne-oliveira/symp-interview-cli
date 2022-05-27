@@ -268,7 +268,15 @@ class CloseInterviewCommand extends Command
         // Set the interview ID
         $this->interviewId = $meta[0]->id;
 
-        $process = BackgroundProcess::createFromPID($meta[0]->pid);
+        // Get list of all PIDs from /usr/lib/code-server process
+
+        $cmdOutput = explode("\n", shell_exec("ps aux | grep /usr/lib/code-server | awk '{print $2}'"));
+        if (!is_array($cmdOutput)) {
+            // TODO: soft-execution adaptations here
+            $this->error('Error while fetching PIDs from Code-server process');
+            return false;
+        }
+
         /*
             // TODO: This was disabled until I found a way to return if the process was already killed
             // or insert a command flag to allow the "soft-execution" of this script
@@ -278,13 +286,19 @@ class CloseInterviewCommand extends Command
             $this->error('The session is already closed or process not found.');
             return false;
         }*/
-
-        if ($process->stop()) {
-            DB::table('code_server_instances')->where('candidate_name', $candidateName)->update(['status' => 0]);
-            return true;
-        }else{
-            $this->error('Error while closing code-server session.');
-            return false;
+        foreach ($cmdOutput as $pid) {
+            if ($pid == '') {
+                continue;
+            }
+            $pid = trim($pid);
+            $process = BackgroundProcess::createFromPID($pid);
+            if ($process->stop()) {
+                DB::table('code_server_instances')->where('candidate_name', $candidateName)->update(['status' => 0]);
+                return true;
+            } else {
+                $this->error('Error while closing code-server session.');
+                return false;
+            }
         }
     }
 
@@ -313,7 +327,7 @@ class CloseInterviewCommand extends Command
         // Here we can insert some code to run after the candidate has been removed
 
         // Update the candidate's status and recommendations
-        
+
 
         // Write the end time for the interview
         // TODO: Write a better query for this
