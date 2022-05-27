@@ -60,6 +60,10 @@ class CreateInterviewCommand extends Command
 
         $candidateName = $this->argument('name');
         $candidateName = str_replace(' ', '_', $candidateName);
+        if(!$candidateName || empty($candidateName)){
+            $candidateName = $this->ask('Please enter the candidate name');
+        }
+        
         $this->info('Creating interview environment for ' . $candidateName);
         $this->candidateName = $candidateName;
 
